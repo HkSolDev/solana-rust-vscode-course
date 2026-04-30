@@ -1,0 +1,14 @@
+[package]
+name = "exercise_08_close_token_account"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+solana-address.workspace = true
+solana-instruction.workspace = true
+solana-keypair.workspace = true
+solana-signer.workspace = true
+spl-token-interface.workspace = true

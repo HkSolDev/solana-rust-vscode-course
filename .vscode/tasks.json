@@ -1,0 +1,81 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Course: Start Course UI",
+      "type": "process",
+      "command": "cargo",
+      "args": [
+        "run",
+        "-p",
+        "course-runner",
+        "--",
+        "start-ui",
+        "--vscode-exec",
+        "${execPath}",
+        "--workspace",
+        "${workspaceFolder}",
+        "--no-open"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Fallback Activation (Open New Window)",
+      "type": "process",
+      "command": "cargo",
+      "args": [
+        "run",
+        "-p",
+        "course-runner",
+        "--",
+        "start-ui",
+        "--vscode-exec",
+        "${execPath}",
+        "--workspace",
+        "${workspaceFolder}"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Check Exercise",
+      "type": "process",
+      "command": "cargo",
+      "args": [
+        "run",
+        "-p",
+        "course-runner",
+        "--",
+        "check",
+        "${input:exercise}"
+      ],
+      "group": "test",
+      "problemMatcher": "$rustc"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "exercise",
+      "type": "pickString",
+      "description": "Exercise to check",
+      "options": [
+        "01_keypairs",
+        "02_airdrop_balance",
+        "03_send_sol",
+        "04_token_metadata",
+        "05_mint_to_tokens",
+        "06_associated_token_account",
+        "07_transfer_checked_tokens",
+        "08_close_token_account",
+        "09_metaplex_core_nft",
+        "10_rpc_client_basics",
+        "11_wallet_file",
+        "12_account_info",
+        "13_confirm_signature",
+        "14_rent_create_account",
+        "15_pda_derivation",
+        "16_simulate_transaction"
+      ],
+      "default": "01_keypairs"
+    }
+  ]
+}

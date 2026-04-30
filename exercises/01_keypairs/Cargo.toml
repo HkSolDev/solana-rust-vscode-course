@@ -1,0 +1,12 @@
+[package]
+name = "exercise_01_keypairs"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+solana-address.workspace = true
+solana-keypair.workspace = true
+solana-signature.workspace = true
+solana-signer.workspace = true

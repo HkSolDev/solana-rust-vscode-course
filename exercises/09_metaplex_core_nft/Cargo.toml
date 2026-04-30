@@ -1,0 +1,13 @@
+[package]
+name = "exercise_09_metaplex_core_nft"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+mpl-core.workspace = true
+solana-address.workspace = true
+solana-instruction.workspace = true
+solana-keypair.workspace = true
+solana-signer.workspace = true

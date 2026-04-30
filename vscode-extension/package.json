@@ -1,0 +1,71 @@
+{
+  "name": "solana-rust-course-ui",
+  "displayName": "Solana Rust Course UI",
+  "description": "Local VS Code sidebar for the Solana Rust client-side course.",
+  "version": "0.1.4",
+  "publisher": "local-course",
+  "author": {
+    "name": "bergabman",
+    "email": "bergabman1@gmail.com"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Education"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "*",
+    "onView:solanaRustCourse.view",
+    "onCommand:solanaRustCourse.showPanel"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "solanaRustCourse.showPanel",
+        "title": "Solana Rust Course: Open Course Panel"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "solanaRustCourse",
+          "title": "Solana Course",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "solanaRustCourse": [
+        {
+          "id": "solanaRustCourse.view",
+          "name": "Course"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "solanaRustCourse.view",
+        "contents": "Open the Solana Rust course controls.\n[Open Course Panel](command:solanaRustCourse.showPanel)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "solanaRustCourse.showPanel",
+          "when": "view == solanaRustCourse.view",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "solanaRustCourse.showPanel"
+        }
+      ]
+    }
+  }
+}

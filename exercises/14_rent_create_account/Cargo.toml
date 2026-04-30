@@ -1,0 +1,17 @@
+[package]
+name = "exercise_14_rent_create_account"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+solana-address.workspace = true
+solana-client.workspace = true
+solana-commitment-config.workspace = true
+solana-keypair.workspace = true
+solana-signature.workspace = true
+solana-signer.workspace = true
+solana-system-interface.workspace = true
+solana-transaction.workspace = true

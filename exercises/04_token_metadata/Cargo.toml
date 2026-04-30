@@ -1,0 +1,16 @@
+[package]
+name = "exercise_04_token_metadata"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+solana-address.workspace = true
+solana-instruction.workspace = true
+solana-keypair.workspace = true
+solana-signer.workspace = true
+solana-system-interface.workspace = true
+spl-token-2022-interface.workspace = true
+spl-token-metadata-interface.workspace = true

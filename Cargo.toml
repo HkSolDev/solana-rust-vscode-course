@@ -1,0 +1,52 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/course-runner",
+    "exercises/01_keypairs",
+    "exercises/02_airdrop_balance",
+    "exercises/03_send_sol",
+    "exercises/04_token_metadata",
+    "exercises/05_mint_to_tokens",
+    "exercises/06_associated_token_account",
+    "exercises/07_transfer_checked_tokens",
+    "exercises/08_close_token_account",
+    "exercises/09_metaplex_core_nft",
+    "exercises/10_rpc_client_basics",
+    "exercises/11_wallet_file",
+    "exercises/12_account_info",
+    "exercises/13_confirm_signature",
+    "exercises/14_rent_create_account",
+    "exercises/15_pda_derivation",
+    "exercises/16_simulate_transaction",
+]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "MIT"
+authors = ["bergabman <bergabman1@gmail.com>"]
+
+[workspace.dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+mpl-core = "0.12.0"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Keep the Solana/Anza crates on one compatible stable client cohort.
+# Some interface crates have lower independent major versions; those are not old Solana releases.
+solana-address = { version = "2", features = ["curve25519"] }
+solana-client = "3"
+solana-commitment-config = "3"
+solana-instruction = "3"
+solana-keypair = "3"
+solana-signature = "=3.3.0"
+solana-signer = "3"
+solana-system-interface = { version = "2", features = ["bincode"] }
+solana-transaction = { version = "3", features = ["bincode"] }
+spl-associated-token-account-interface = "2"
+spl-token-2022-interface = "2"
+spl-token-interface = "2"
+spl-token-metadata-interface = "0.8"
+tokio = { version = "1", features = ["macros", "process", "rt-multi-thread", "time"] }
+toml = "0.8"

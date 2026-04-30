@@ -1,0 +1,429 @@
+[course]
+id = "solana-rust-vscode-course"
+title = "Solana Rust Client Course for VS Code"
+description = "A compact Rust-first course and VS Code sidebar for learning Solana client-side basics."
+
+[[exercise]]
+id = "01_keypairs"
+title = "Keypairs and addresses"
+package = "exercise_01_keypairs"
+needs_surfpool = false
+lesson = "book/src/01-keypairs.md"
+hints = [
+    "Create a fresh wallet with the solana-keypair Keypair type.",
+    "The account address comes from the Signer trait, so make sure Signer is in scope.",
+    "Return the wallet's address directly; do not create a new keypair inside wallet_address.",
+]
+solution = """
+pub fn new_wallet() -> Keypair {
+    Keypair::new()
+}
+
+pub fn wallet_address(wallet: &Keypair) -> Address {
+    wallet.pubkey()
+}
+"""
+
+[[exercise]]
+id = "02_airdrop_balance"
+title = "Airdrops and balances through RPC"
+package = "exercise_02_airdrop_balance"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/02-airdrop-balance.md"
+hints = [
+    "Use RpcClient::request_airdrop with the recipient address and lamports.",
+    "The airdrop returns a signature; confirm that signature before reading the balance.",
+    "After confirmation, ask the same client for get_balance(recipient).",
+]
+solution = """
+let signature = client.request_airdrop(recipient, lamports)?;
+client.confirm_transaction(&signature)?;
+let balance = client.get_balance(recipient)?;
+Ok(balance)
+"""
+
+[[exercise]]
+id = "03_send_sol"
+title = "Send SOL between wallets"
+package = "exercise_03_send_sol"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/03-send-sol.md"
+hints = [
+    "Start with system_instruction::transfer(&payer.pubkey(), recipient, lamports).",
+    "Fetch a recent blockhash from the RpcClient before creating the transaction.",
+    "Sign with Transaction::new_signed_with_payer, then send_and_confirm_transaction and return the signature.",
+]
+solution = """
+let transfer = system_instruction::transfer(&payer.pubkey(), recipient, lamports);
+let recent_blockhash = client.get_latest_blockhash()?;
+let transaction = Transaction::new_signed_with_payer(
+    &[transfer],
+    Some(&payer.pubkey()),
+    &[payer],
+    recent_blockhash,
+);
+
+let signature = client.send_and_confirm_transaction(&transaction)?;
+Ok(signature)
+"""
+
+[[exercise]]
+id = "04_token_metadata"
+title = "Create an SPL token with metadata"
+package = "exercise_04_token_metadata"
+needs_surfpool = false
+lesson = "book/src/04-token-metadata.md"
+hints = [
+    "The mint account is created with the System Program, but it is owned by TOKEN_2022_PROGRAM_ID.",
+    "Initialize the metadata pointer before initializing the mint, and point the metadata address at the mint itself.",
+    "Use the token metadata interface against TOKEN_2022_PROGRAM_ID to initialize name, symbol, URI, and then update the description field.",
+]
+solution = """
+let create_mint = system_instruction::create_account(
+    payer,
+    mint,
+    rent_lamports,
+    mint_space,
+    &TOKEN_2022_PROGRAM_ID,
+);
+let initialize_pointer = metadata_pointer_instruction::initialize(
+    &TOKEN_2022_PROGRAM_ID,
+    mint,
+    Some(*payer),
+    Some(*mint),
+)?;
+let initialize_mint = token_instruction::initialize_mint(
+    &TOKEN_2022_PROGRAM_ID,
+    mint,
+    payer,
+    Some(payer),
+    config.decimals,
+)?;
+let initialize_metadata = token_metadata_instruction::initialize(
+    &TOKEN_2022_PROGRAM_ID,
+    mint,
+    payer,
+    mint,
+    payer,
+    config.name,
+    config.symbol,
+    config.uri,
+);
+let update_description = token_metadata_instruction::update_field(
+    &TOKEN_2022_PROGRAM_ID,
+    mint,
+    payer,
+    Field::Key(\"description\".to_string()),
+    config.description,
+);
+
+Ok(vec![
+    create_mint,
+    initialize_pointer,
+    initialize_mint,
+    initialize_metadata,
+    update_description,
+])
+"""
+
+[[exercise]]
+id = "05_mint_to_tokens"
+title = "Mint tokens to an account"
+package = "exercise_05_mint_to_tokens"
+needs_surfpool = false
+lesson = "book/src/05-mint-to-tokens.md"
+hints = [
+    "Use the Token-2022 instruction module, not the classic SPL Token program.",
+    "The checked mint instruction needs the mint, destination token account, mint authority, amount, and decimals.",
+    "For a single mint authority, pass an empty multisig signer slice so the authority account signs directly.",
+]
+solution = """
+Ok(token_instruction::mint_to_checked(
+    &TOKEN_2022_PROGRAM_ID,
+    mint,
+    destination_token_account,
+    mint_authority,
+    &[],
+    amount,
+    decimals,
+)?)
+"""
+
+[[exercise]]
+id = "06_associated_token_account"
+title = "Derive and create an ATA"
+package = "exercise_06_associated_token_account"
+needs_surfpool = false
+lesson = "book/src/06-associated-token-account.md"
+hints = [
+    "The ATA address is derived from wallet, token program, mint, and the ATA program.",
+    "Use the idempotent create instruction so repeated setup is safe.",
+    "Return both the derived address and the instruction that creates it.",
+]
+solution = """
+let address = get_associated_token_address_with_program_id(wallet, mint, &TOKEN_PROGRAM_ID);
+let instruction =
+    create_associated_token_account_idempotent(payer, wallet, mint, &TOKEN_PROGRAM_ID);
+
+AtaPlan {
+    address,
+    instruction,
+}
+"""
+
+[[exercise]]
+id = "07_transfer_checked_tokens"
+title = "Transfer checked tokens"
+package = "exercise_07_transfer_checked_tokens"
+needs_surfpool = false
+lesson = "book/src/07-transfer-checked-tokens.md"
+hints = [
+    "Use the SPL Token instruction module, not the System Program.",
+    "transfer_checked includes the mint and decimals so clients cannot silently use the wrong precision.",
+    "For a single owner authority, pass an empty multisig signer slice.",
+]
+solution = """
+Ok(token_instruction::transfer_checked(
+    &TOKEN_PROGRAM_ID,
+    source,
+    mint,
+    destination,
+    authority,
+    &[],
+    amount,
+    decimals,
+)?)
+"""
+
+[[exercise]]
+id = "08_close_token_account"
+title = "Close an empty token account"
+package = "exercise_08_close_token_account"
+needs_surfpool = false
+lesson = "book/src/08-close-token-account.md"
+hints = [
+    "Closing a token account sends its rent lamports to the destination.",
+    "The token account and destination are writable; the owner signs.",
+    "Use token_instruction::close_account with the SPL Token program ID.",
+]
+solution = """
+Ok(token_instruction::close_account(
+    &TOKEN_PROGRAM_ID,
+    token_account,
+    destination,
+    owner,
+    &[],
+)?)
+"""
+
+[[exercise]]
+id = "09_metaplex_core_nft"
+title = "Create an NFT with Metaplex Core"
+package = "exercise_09_metaplex_core_nft"
+needs_surfpool = false
+lesson = "book/src/09-metaplex-core-nft.md"
+hints = [
+    "Use mpl_core::instructions::CreateV1Builder; Core creates an asset account rather than an SPL mint.",
+    "Set asset, payer, owner, name, and uri on the builder.",
+    "Finish with .instruction(); the payer and asset keypairs will sign when this instruction is put into a transaction.",
+]
+solution = """
+CreateV1Builder::new()
+    .asset(*asset)
+    .payer(*payer)
+    .owner(Some(*owner))
+    .name(config.name)
+    .uri(config.uri)
+    .instruction()
+"""
+
+[[exercise]]
+id = "10_rpc_client_basics"
+title = "RPC client basics"
+package = "exercise_10_rpc_client_basics"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/10-rpc-client-basics.md"
+hints = [
+    "Use RpcClient::new_with_commitment with CommitmentConfig::confirmed().",
+    "RpcClient exposes url(), get_slot(), and get_version() helpers.",
+    "Copy the values into the RpcStatus struct; do not invent placeholder status data.",
+]
+solution = """
+pub fn confirmed_client(rpc_url: &str) -> RpcClient {
+    RpcClient::new_with_commitment(rpc_url.to_string(), CommitmentConfig::confirmed())
+}
+
+pub fn fetch_rpc_status(client: &RpcClient) -> Result<RpcStatus> {
+    let slot = client.get_slot()?;
+    let version = client.get_version()?;
+
+    Ok(RpcStatus {
+        url: client.url(),
+        slot,
+        solana_core: version.solana_core,
+    })
+}
+"""
+
+[[exercise]]
+id = "11_wallet_file"
+title = "Load a wallet keypair file"
+package = "exercise_11_wallet_file"
+needs_surfpool = false
+lesson = "book/src/11-wallet-file.md"
+hints = [
+    "Solana CLI keypair files are JSON arrays of 64 secret/public key bytes.",
+    "Use solana_keypair::read_keypair_file instead of parsing the file yourself.",
+    "Bring the Signer trait into scope to call pubkey() on the loaded keypair.",
+]
+solution = """
+pub fn load_keypair_file(path: &Path) -> Result<Keypair> {
+    solana_keypair::read_keypair_file(path)
+        .map_err(|error| anyhow::anyhow!(\"failed to read keypair file: {error}\"))
+}
+
+pub fn wallet_address_from_file(path: &Path) -> Result<Address> {
+    let wallet = load_keypair_file(path)?;
+    Ok(wallet.pubkey())
+}
+"""
+
+[[exercise]]
+id = "12_account_info"
+title = "Fetch and inspect account info"
+package = "exercise_12_account_info"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/12-account-info.md"
+hints = [
+    "Use get_account_with_commitment so the caller controls the consistency level.",
+    "The RPC response wraps the account in response.value; missing accounts are None.",
+    "The account object contains lamports, owner, executable, and data fields.",
+]
+solution = """
+let account = client
+    .get_account_with_commitment(address, commitment)?
+    .value
+    .context(\"account not found\")?;
+
+Ok(AccountSnapshot {
+    lamports: account.lamports,
+    owner: account.owner,
+    executable: account.executable,
+    data_len: account.data.len(),
+})
+"""
+
+[[exercise]]
+id = "13_confirm_signature"
+title = "Confirm a transaction signature"
+package = "exercise_13_confirm_signature"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/13-confirm-signature.md"
+hints = [
+    "request_airdrop returns a Signature, not a balance.",
+    "Use confirm_transaction_with_commitment when the caller provides a commitment.",
+    "Poll confirmation briefly; local RPC may not report the signature on the first read.",
+]
+solution = """
+let signature = client.request_airdrop(recipient, lamports)?;
+
+for _ in 0..20 {
+    let confirmed = client
+        .confirm_transaction_with_commitment(&signature, commitment)?
+        .value;
+    if confirmed {
+        return Ok(signature);
+    }
+    std::thread::sleep(std::time::Duration::from_millis(100));
+}
+
+anyhow::bail!(\"transaction was not confirmed\")
+"""
+
+[[exercise]]
+id = "14_rent_create_account"
+title = "Create a rent-exempt account"
+package = "exercise_14_rent_create_account"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/14-rent-create-account.md"
+hints = [
+    "Ask RPC for get_minimum_balance_for_rent_exemption(space).",
+    "Build a System Program create_account instruction owned by the requested owner.",
+    "The new account keypair must sign along with the payer.",
+]
+solution = """
+let rent_lamports = client.get_minimum_balance_for_rent_exemption(space)?;
+let create_account = system_instruction::create_account(
+    &payer.pubkey(),
+    &new_account.pubkey(),
+    rent_lamports,
+    space as u64,
+    owner,
+);
+let recent_blockhash = client.get_latest_blockhash()?;
+let transaction = Transaction::new_signed_with_payer(
+    &[create_account],
+    Some(&payer.pubkey()),
+    &[payer, new_account],
+    recent_blockhash,
+);
+
+Ok(client.send_and_confirm_transaction(&transaction)?)
+"""
+
+[[exercise]]
+id = "15_pda_derivation"
+title = "Derive a PDA"
+package = "exercise_15_pda_derivation"
+needs_surfpool = false
+lesson = "book/src/15-pda-derivation.md"
+hints = [
+    "Convert the index to bytes once with to_le_bytes so the seed lives long enough.",
+    "Use the seeds b\"course\", label.as_bytes(), wallet.as_ref(), and the index bytes.",
+    "Address::find_program_address returns both the PDA and the bump.",
+]
+solution = """
+let index_bytes = index.to_le_bytes();
+let (address, bump) = Address::find_program_address(
+    &[b\"course\", label.as_bytes(), wallet.as_ref(), &index_bytes],
+    program_id,
+);
+
+PdaResult { address, bump }
+"""
+
+[[exercise]]
+id = "16_simulate_transaction"
+title = "Simulate before sending"
+package = "exercise_16_simulate_transaction"
+needs_surfpool = true
+surfpool_mode = "offline"
+lesson = "book/src/16-simulate-transaction.md"
+hints = [
+    "Build the same System Program transfer instruction you would send for real.",
+    "Simulation still needs a recent blockhash and a signed transaction shape.",
+    "Use client.simulate_transaction and summarize err, logs, and units_consumed.",
+]
+solution = """
+let transfer = system_instruction::transfer(&payer.pubkey(), recipient, lamports);
+let recent_blockhash = client.get_latest_blockhash()?;
+let transaction = Transaction::new_signed_with_payer(
+    &[transfer],
+    Some(&payer.pubkey()),
+    &[payer],
+    recent_blockhash,
+);
+let result = client.simulate_transaction(&transaction)?.value;
+
+Ok(SimulationSummary {
+    ok: result.err.is_none(),
+    logs: result.logs.unwrap_or_default(),
+    units_consumed: result.units_consumed,
+})
+"""
