@@ -4,10 +4,14 @@ use solana_keypair::Keypair;
 use solana_signer::Signer;
 
 pub fn new_wallet() -> Keypair {
-    todo!("create and return a new Solana keypair")
+
+    let keypair = Keypair::new();
+    keypair
+
+
 }
 
 pub fn wallet_address(wallet: &Keypair) -> Address {
     let _ = wallet;
-    todo!("return the account address for this wallet")
+wallet.pubkey()
 }
